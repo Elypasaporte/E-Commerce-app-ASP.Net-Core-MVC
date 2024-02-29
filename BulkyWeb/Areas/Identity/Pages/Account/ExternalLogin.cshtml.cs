@@ -177,10 +177,11 @@ namespace BulkyBookWeb.Areas.Identity.Pages.Account
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(user, SD.Role_Customer);
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        await _userManager.AddToRoleAsync(user, SD.Role_Customer);
+                        
 
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
