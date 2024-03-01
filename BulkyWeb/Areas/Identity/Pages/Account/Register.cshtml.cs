@@ -115,12 +115,17 @@ namespace BulkyBookWeb.Areas.Identity.Pages.Account
             public IEnumerable<SelectListItem> RoleList { get; set; }
 
             [Required]
-            public string Name { get; set; }   
-            public string? StreetAddress { get; set; }  
-            public string?  City { get; set; }
-            public string?  State { get; set; }
-            public string?  PostalCode { get; set; }
-            public string?  PhoneNumber { get; set; }
+            public string Name { get; set; }
+            [Required]
+            public string StreetAddress { get; set; }
+            [Required]
+            public string  City { get; set; }
+            [Required]
+            public string  State { get; set; }
+            [Required]
+            public string  PostalCode { get; set; }
+            [Required]
+            public string  PhoneNumber { get; set; }
             public int? CompanyId { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> CompanyList { get; set; }
@@ -161,7 +166,7 @@ namespace BulkyBookWeb.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                user.StreetAddress = Input.Email;
+                user.StreetAddress = Input.StreetAddress;
                 user.City = Input.City;
                 user.Name = Input.Name;
                 user.State = Input.State;

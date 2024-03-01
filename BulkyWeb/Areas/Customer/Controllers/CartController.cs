@@ -16,7 +16,6 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
         private readonly IUnitOfWork _unitOfWork;
         [BindProperty]
         public ShoppingCartVM ShoppingCartVM { get; set; }
-
         public CartController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -126,8 +125,8 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             if (applicationUser.CompanyID.GetValueOrDefault() == 0)
             {
                 // regular customer account and we need to capture payment
-                // stripe logic
-                var domain = Request.Scheme+"://"+ Request.Host.Value+"/";
+                // stripe logic 
+                var domain = Request.Scheme+ "://" + Request.Host.Value + "/";
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",
