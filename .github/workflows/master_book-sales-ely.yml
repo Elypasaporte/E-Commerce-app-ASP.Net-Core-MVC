@@ -55,3 +55,8 @@ jobs:
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_39556DF5D19C487685B4A6252874B6D0 }}
           package: .
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+            node-version: 20.x
+          
