@@ -79,17 +79,27 @@ app.Run();
 
 void SeedDataBase()
 {
-    using ( var scope = app.Services.CreateScope())
+    using (var scope = app.Services.CreateScope())
     {
-       var dbInitializer =  scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
 
         dbInitializer.Initialize();
+
+        int retries = 5;
+        int delaySeconds = 5;
+
+        while (retries > 0)
+        {
+            try
+            {
+                dbInitializer.Initialize();
+                break; // Success
+            }
+            catch (Exception ex)
+            {
+                retries--;
+            }
+        }
     }
-     catch (Exception ex)
-    {
-        // Log to console or use ILogger here
-        Console.WriteLine("❌ Error in DB seeding: " + ex.Message);
-        // Optional: throw again if you want the app to crash
-        // throw;
-    }
+    
 }
