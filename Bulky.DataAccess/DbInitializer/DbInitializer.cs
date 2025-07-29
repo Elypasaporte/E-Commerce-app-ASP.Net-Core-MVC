@@ -28,21 +28,36 @@ namespace BulkyBook.DataAccess.DbInitializer
         }
         public void Initialize()
         {
-            //migrations if they are not applied
+            const int maxRetries = 5;
+            const int delaySeconds = 5;
 
-            try
+            int attempt = 0;
+            bool dbReady = false;
+
+            while (attempt < maxRetries && !dbReady)
             {
-                if( _db.Database.GetPendingMigrations().Count() > 0)
+                try
                 {
-                    _db.Database.Migrate();
-                }    
-            }
-            catch (Exception ex)
-            {
+                    if (_db.Database.GetPendingMigrations().Any())
+                    {
+                        _db.Database.Migrate();
+                    }
 
+                    dbReady = true; // Success
+                }
+                catch (Exception ex)
+                {
+                    attempt++;
+                    Console.WriteLine($"[DbInitializer] Attempt {attempt} failed: {ex.Message}");
+
+                    if (attempt == maxRetries)
+                        throw new Exception("Could not connect to database after multiple retries.", ex);
+
+                    Thread.Sleep(delaySeconds * 1000);
+                }
             }
 
-            // create roles if they are not created
+            // Now that DB is ready, check/create roles and admin user
             if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
             {
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer)).GetAwaiter().GetResult();
@@ -50,8 +65,7 @@ namespace BulkyBook.DataAccess.DbInitializer
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_Company)).GetAwaiter().GetResult();
 
-                // if roles are not created, then we will create admin user as well
-                _userManager.CreateAsync(new ApplicationUser
+                var adminUser = new ApplicationUser
                 {
                     UserName = "admin@admin.com",
                     Email = "admin@admin.com",
@@ -61,13 +75,16 @@ namespace BulkyBook.DataAccess.DbInitializer
                     State = "IL",
                     PostalCode = "23422",
                     City = "Chicago"
-                    
-                }, "Admin123*").GetAwaiter().GetResult();
+                };
 
-                ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@admin.com");
-                _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
+                _userManager.CreateAsync(adminUser, "Admin123*").GetAwaiter().GetResult();
+                var user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@admin.com");
+
+                if (user != null)
+                {
+                    _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
+                }
             }
-            return;
         }
     }
 }
