@@ -12,6 +12,9 @@ using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -81,5 +84,12 @@ void SeedDataBase()
        var dbInitializer =  scope.ServiceProvider.GetRequiredService<IDbInitializer>();
 
         dbInitializer.Initialize();
+    }
+     catch (Exception ex)
+    {
+        // Log to console or use ILogger here
+        Console.WriteLine("❌ Error in DB seeding: " + ex.Message);
+        // Optional: throw again if you want the app to crash
+        // throw;
     }
 }
